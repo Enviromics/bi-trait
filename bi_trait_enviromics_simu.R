@@ -115,7 +115,7 @@ simulate_exp_cst <- function(par = list()) {
     n_cul_core = 3L, pi_gen_exp = 0.50, pi_cul_var_exp = 0.60,
     n_snp = 50L, n_chr = NULL, n_founders = 120L, seg_sites = 1400L,
     min_maf_try = c(0.05, 0.02, 0.01), n_progeny = 3L, n_cross_min = 60L,
-    mu_exp = 250, mu_cst = 225, vg_exp = 80, vg_cst = 35, cov_g = 10, ve_exp = 20, ve_cst = 22,
+    mu_exp = 250, mu_cst = 235, vg_exp = 80, vg_cst = 35, cov_g = 25, ve_exp = 80, ve_cst = 35,
     sd_loc = 6.0, sd_beta = 2.2,
     .loess_span = 0.95, .axis_range = c(0.85, 1.15), .sd_rw_mult = 0.05,
     .sd_latent_pix_mult = 0.005, .sd_latent_pix_add = 0.00, .sd_ec_add = 0.05,

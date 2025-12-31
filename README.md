@@ -11,7 +11,7 @@ The code is intended for reproducible methodological investigations in plant bre
 
 ## 2. Simulation of EXP/CST enviromic data
 
-Simulation is implemented in the function `simulate_exp_cst()` and targets paired datasets for EXP (experimental trials) and CST (commercial stands). Design choices are intentionally strict: a raster-like target population of environments (TPE), a fixed pixel grid, a one-to-one LOC–pixel mapping, and environmental covariates (ECs) that are constant within each location.
+Simulation is implemented in the function `simulate_exp_cst()` and targets paired datasets for EXP (experimental trials) and CST (commercial stands). Design choices are intentionally strict: a raster-like target population of environments (TPE), a fixed pixel grid, a one-to-one LOC–pixel mapping, and environmental covariates (ECs) that are constant within each location. [bi_trait_enviromics_simu.R](https://github.com/Enviromics/bi-trait/blob/main/bi_trait_enviromics_simu.R)
 
 ### Core design principles
 
@@ -62,7 +62,7 @@ The function returns `list(pheno, M, G, tpe)`, where:
 
 This repository implements a bi-trait enviromics mixed model contrasting EXP and CST within a unified REML framework. The two contexts are treated as correlated observation systems of the same biological entities, enabling joint inference while preserving their distinct data-generation processes.
 
-Model fitting is performed via a **Derivative-Free REML (DF-REML)** algorithm and follows a random regression formulation on environmental covariates, allowing genotype-specific environmental responses to differ between EXP and CST.
+Model fitting is performed via a **Derivative-Free REML (DF-REML)** algorithm and follows a random regression formulation on environmental covariates, allowing genotype-specific environmental responses to differ between EXP and CST. [DF-REML_bi-trait.R](https://github.com/Enviromics/bi-trait/blob/main/df-reml/DF-REML_bi-trait.R)
 
 ### Model structure
 

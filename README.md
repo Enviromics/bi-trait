@@ -7,7 +7,7 @@ This repository provides R code supporting a methodological framework for bi-tra
 
 The repository includes (i) a spatially explicit simulator to generate paired EXP and CST datasets under controlled imbalance, shared genetic material, and structured enviromic gradients; and (ii) a derivative-free REML (DF-REML) implementation for fitting bi-context mixed models, with emphasis on estimating genetic and residual variance–covariance components between EXP and CST.
 
-The code is intended for reproducible methodological investigations in plant breeding and quantitative genetics. It accompanies a manuscript under review and is not designed as a production-ready analysis pipeline.
+The code is intended for reproducible methodological investigations in plant breeding and quantitative genetics.
 
 ## 2. Simulation of EXP/CST enviromic data
 

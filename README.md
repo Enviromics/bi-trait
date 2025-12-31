@@ -3,85 +3,85 @@ R code for bi-trait enviromics data simulation and mixed-model inference, contra
 
 ## 1. Overview
 
-This repository provides R code supporting a methodological framework for bi-trait enviromics analyses, where the two traits represent distinct data-generation contexts: experimental trials (EXP) and commercial stands (CST). The objective is to study how information generated under controlled experimental conditions can be statistically integrated with large-scale, heterogeneous commercial data using mixed models enriched with environmental covariates.
+This repository provides R code supporting a methodological framework for bi-trait enviromics analyses, where the two traits represent distinct data-generation contexts: experimental trials (EXP) and commercial stands (CST). The objective is to study how information generated under controlled experimental conditions can be statistically integrated with large-scale, heterogeneous commercial data using mixed models with environmental covariates.
 
-The repository includes (i) a spatially explicit simulator designed to generate EXP and CST datasets under controlled imbalance, shared genetic material, and structured enviromic gradients; and (ii) a derivative-free REML (DF-REML) implementation for fitting bi-context mixed models, focusing on the estimation of genetic and residual variance–covariance components between EXP and CST.
+The repository includes (i) a spatially explicit simulator to generate paired EXP and CST datasets under controlled imbalance, shared genetic material, and structured enviromic gradients; and (ii) a derivative-free REML (DF-REML) implementation for fitting bi-context mixed models, with emphasis on estimating genetic and residual variance–covariance components between EXP and CST.
 
-The code is intended for reproducible methodological investigations in plant breeding and quantitative genetics, particularly for assessing the feasibility and limits of linking experimental and commercial performance through enviromics. The repository accompanies a manuscript under review and is not designed as a production-ready analysis pipeline.
+The code is intended for reproducible methodological investigations in plant breeding and quantitative genetics. It accompanies a manuscript under review and is not designed as a production-ready analysis pipeline.
 
 ## 2. Simulation of EXP/CST enviromic data
 
-Simulation is implemented in `simulate_exp_cst()` and targets a paired dataset with two contexts: EXP (experimental trials) and CST (commercial stands). Design choices are strict on purpose: a raster-like TPE with a fixed pixel grid, a strict LOC↔pixel mapping, and ECs copied from pixel to LOC (constant within LOC). :contentReference[oaicite:0]{index=0}
+Simulation is implemented in the function `simulate_exp_cst()` and targets paired datasets for EXP (experimental trials) and CST (commercial stands). Design choices are intentionally strict: a raster-like target population of environments (TPE), a fixed pixel grid, a one-to-one LOC–pixel mapping, and environmental covariates (ECs) that are constant within each location.
 
-### Core design (what is enforced)
-2.1. **TPE and coordinates**
-   - Square grid (`n_grid × n_grid`) on continuous coordinates in `[1,10] × [1,10]`.
-   - No jitter and no “free” coordinates; each LOC is assigned to exactly one pixel.
+### Core design principles
 
-2.2. **Enviromics (ECs)**
-   - Latent spatial factors (`q_latent`: F1..Fq) built from separable 1D multiplicative random-walk surfaces along Lon/Lat, then smoothed and scaled.
-   - ECs (`p_ec`: EC1..ECp) derived from subsets of latent factors using mild non-linear transforms and small noise; EC values are constant within LOC.
+- **Spatial structure**  
+  The TPE is defined as a square grid (`n_grid × n_grid`) on continuous coordinates within `[1,10] × [1,10]`. No jittering or free coordinates are allowed; each location is assigned to exactly one raster pixel.
 
-2.3. **Genetics**
-   - Materials = GEN (breeding genotypes) + CUL (cultivars/checks).
-   - SNPs simulated with AlphaSimR (`n_snp`), returning `M` (0/1/2) and `G` (VanRaden).
+- **Enviromics**  
+  Latent spatial factors are constructed from separable one-dimensional random-walk surfaces along longitude and latitude. Environmental covariates (EC1…ECp) are derived from these latent fields through simple non-linear transformations and scaling, remaining constant within locations.
 
-2.4. **Phenotypes**
-   - Context-specific means (`mu_exp`, `mu_cst`), LOC random effect (`sd_loc`), EC contribution (context-specific regression; `sd_beta`), genetic effects with cross-context covariance (`vg_exp`, `vg_cst`, `cov_g`), and residuals (`ve_exp`, `ve_cst`).
+- **Genetic material**  
+  The simulated population includes breeding genotypes (GEN) and cultivars (CUL, used as checks). SNP markers are generated using AlphaSimR, yielding a marker matrix (M) and a genomic relationship matrix (G) computed via the VanRaden method.
 
-2.5. **Sampling rules and imbalance**
-   - **EXP:** BLUE-like (≤ 1 obs per (GCD, LOC)).
-     - GEN presence per LOC_EXP is Bernoulli (`pi_gen_exp`), with constraints: each GEN appears ≥ 1 time and each LOC_EXP contains ≥ 1 GEN.
-     - CUL checks: core checks (`n_cul_core`) appear in all EXP LOCs; remaining cultivars enter by LOC with `pi_cul_var_exp`.
-   - **CST:** one cultivar per LOC; enforced coverage so every CUL appears at least once overall (`n_loc_cst ≥ n_cul`).
+- **Phenotype generation**  
+  Phenotypes combine context-specific means (EXP, CST), location effects, enviromic contributions, genetic effects with cross-context covariance, and residual noise.
 
-### Minimal parameter map (what you actually change most often)
-- **Reproducibility:** `seed`
-- **Spatial resolution / number of environments:** `n_grid`, `n_loc_exp`, `n_loc_cst`, `overlap_locs`
-- **Enviromics:** `q_latent`, `p_ec`
-- **Genetics:** `n_gen`, `n_cul`, `n_snp`
-- **EXP imbalance / checks:** `pi_gen_exp`, `n_cul_core`, `pi_cul_var_exp`
-- **Signal levels:** `mu_exp`, `mu_cst`, `vg_exp`, `vg_cst`, `cov_g`, `ve_exp`, `ve_cst`, `sd_loc`, `sd_beta`
+- **Sampling and imbalance**  
+  EXP data follow a BLUE-like structure with at most one observation per genotype–location combination. Genotype presence per location is probabilistic, subject to connectivity constraints. A subset of cultivars acts as core checks present in all EXP locations, with additional cultivars entering variably. CST data represent commercial stands, with one cultivar per location and enforced coverage across cultivars.
+
+### Key simulation controls
+
+Frequently modified parameters include:
+- Spatial resolution and environments: `n_grid`, `n_loc_exp`, `n_loc_cst`
+- Enviromic structure: `q_latent`, `p_ec`
+- Genetic design: `n_gen`, `n_cul`, `n_snp`
+- EXP imbalance and checks: `pi_gen_exp`, `n_cul_core`, `pi_cul_var_exp`
+- Signal levels: `mu_exp`, `mu_cst`, `vg_exp`, `vg_cst`, `cov_g`, `ve_exp`, `ve_cst`
 
 ### Outputs
-`simulate_exp_cst()` returns `list(pheno, M, G, tpe)` where `tpe` is optional (pixel-level table with latent factors and ECs).
+
+The function returns `list(pheno, M, G, tpe)`, where:
+
+**pheno** is the observation-level table used for downstream inference, with one row per evaluated material × environment. Columns are:
+- `Lon`, `Lat`: continuous spatial coordinates of the location, inherited from the raster pixel.
+- `LOC`: environment (location) identifier.
+- `TYP`: data-generation context (`EXP` = experimental trial; `CST` = commercial stand).
+- `CHK`: check indicator (`YES`/`NO` for EXP; `NA` for CST).
+- `GCD`: genetic material identifier (breeding genotype `GEN*` or cultivar `CUL*`).
+- `Y`: simulated response variable.
+- `EC1` … `ECp`: environmental covariates, constant within each `LOC`.
+
+**M** is the marker matrix (one row per genetic material, one column per SNP), coded as 0/1/2 allele counts and used to represent the genomic information underlying genetic effects.
+
+**G** is the genomic relationship matrix computed from `M` (VanRaden formulation), capturing realized genetic relatedness among all GEN and CUL entries and used directly in the bi-trait mixed model.
+
+**tpe** is an optional square raster-level table describing the target population of environments, containing pixel coordinates and the latent spatial factors and environmental covariates used to generate the location-level enviromic structure.
 
 ## 3. Bi-trait enviromics model (EXP vs CST)
 
-This repository implements a bi-trait enviromics mixed model contrasting **experimental trials (EXP)** and **commercial stands (CST)** within a unified REML framework. EXP and CST are treated as two correlated observation contexts of the same biological system, enabling joint inference while preserving their distinct data-generating mechanisms.
+This repository implements a bi-trait enviromics mixed model contrasting EXP and CST within a unified REML framework. The two contexts are treated as correlated observation systems of the same biological entities, enabling joint inference while preserving their distinct data-generation processes.
 
-Model fitting is performed via a **Derivative-Free REML (DF-REML)** algorithm. The formulation follows a random regression structure on environmental covariates (ECs), allowing genotype-specific environmental responses to be estimated separately for EXP and CST.
+Model fitting is performed via a **Derivative-Free REML (DF-REML)** algorithm and follows a random regression formulation on environmental covariates, allowing genotype-specific environmental responses to differ between EXP and CST.
 
-### Model specification
+### Model structure
 
-For each observation, the response is modeled using:
+The model includes:
 - Context-specific fixed intercepts (EXP, CST).
 - Genotype-level random regression coefficients on ECs, nested within context.
 - A 2×2 genetic variance–covariance matrix (G₀) linking EXP and CST.
 - Context-specific residual variances (R₀).
 
-Genetic relationships among genotypes are modeled using a genomic relationship matrix derived from marker data (VanRaden formulation), ensuring consistency between simulation and inference.
+Genetic relationships are modeled using a genomic relationship matrix derived from SNP markers, ensuring consistency between simulation and inference.
 
 ### Input data files
 
-The DF-REML analysis operates on two input files:
+The DF-REML analysis operates on:
+- `phenos_and_ECs.txt`: phenotypic data with genotype identifiers, context (EXP/CST), locations, coordinates, responses, and environmental covariates.
+- `M.txt`: SNP marker matrix used to construct the genomic relationship matrix.
 
-- `phenos_and_ECs.txt`  
-  Phenotypic dataset containing genotype identifiers, context labels (EXP/CST), locations, spatial coordinates, response values, and associated environmental covariates.
-
-- `M.txt`  
-  SNP marker matrix used to construct the genomic relationship matrix.
-
-These files are either produced by the simulation module or provided directly for reproducing the analyses reported in the associated manuscript.
+These files are directly compatible with the simulation output and allow full reproduction of the analyses.
 
 ### Outputs
 
-The DF-REML script returns:
-- Estimates of genetic and residual variance–covariance components (G₀ and R₀).
-- Genetic correlation between EXP and CST.
-- BLUPs for genotype intercepts and EC slopes by context.
-- Predicted values for observed data and for genotypes projected as CST.
-- Diagnostic summaries and visualization-ready objects.
-
-This framework enables direct evaluation of how genotypes evaluated under EXP conditions are expected to perform when deployed as CST across heterogeneous environments.
-
+The DF-REML script returns variance–covariance estimates (G₀, R₀), genetic correlations between EXP and CST, BLUPs for genotype intercepts and EC slopes, predicted values, and diagnostic summaries. The framework supports direct evaluation of how genotypes assessed in EXP are expected to perform when deployed as CST across heterogeneous environments.

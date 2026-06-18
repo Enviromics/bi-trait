@@ -1,29 +1,82 @@
-# Bi-trait Genomic--Enviromic Data
+# Cassava BTY--CTY Data
 
-This repository provides the data associated with the study on bi-trait genomic--enviromic prediction for projecting breeding-stage genotype performance toward cultivar-stage target performance.
+This folder contains the cleaned input data used in the CassavaBase BTY--CTY case study.
 
-## Contents
+## Files
 
-The repository includes:
+| File       | Description                                                           |
+| ---------- | --------------------------------------------------------------------- |
+| `phe.csv`  | Phenotypic pseudo-responses at the `Loc × TS × Gen` level.            |
+| `ec.csv`   | Environmental covariates for the 26 locations used in the case study. |
+| `M10K.csv` | SNP marker matrix with 10,000 markers for the 378 genotypes.          |
 
-* simulated data used in the illustrative analyses;
-* processed CassavaBase data used in the empirical case study;
-* environmental covariates extracted for the empirical locations.
+## Phenotypic data
 
-## Simulated data
+`phe.csv` contains the response variable used in the case study.
 
-The simulated data include phenotypic values, environmental covariates, SNP markers, genotype identifiers, and location identifiers used to illustrate the bi-trait genomic--enviromic DF-REML framework.
+Main columns:
 
-## CassavaBase data
+* `Program`: breeding program source;
+* `Loc`: location code;
+* `TS`: trait-stage code;
+* `Gen`: genotype identifier;
+* `n_obs`: number of original records used;
+* `y_mean`: mean of original observations;
+* `y_asterisk`: final pseudo-response used in the analyses.
 
-The CassavaBase files correspond only to the processed subset used in the empirical analyses. They include the organized phenotypic records used to define BTY and CTY, genotype and location identifiers, and the environmental covariate matrix extracted for the 26 empirical locations.
+Trait-stage codes:
 
-BTY was derived from `FYLD` records from Preliminary Yield Trials. CTY was derived from `DYLD` records from Variety Release Trials and Regional Trials.
+| Code  | Definition                                                                         |
+| ----- | ---------------------------------------------------------------------------------- |
+| `BTY` | Breeding Trial Yield, derived from `FYLD` in Preliminary Yield Trials.             |
+| `CTY` | Cultivar Target Yield, derived from `DYLD` in Variety Release and Regional Trials. |
 
-These files do not represent the complete CassavaBase database.
+## Environmental covariates
 
-## Citation
+`ec.csv` contains location identifiers, coordinates, and environmental covariates.
 
-If these data are used, please cite:
+Main columns:
 
-> Resende, R. T. (2025). *How to enviromically predict breeding genotypes as if they were commercial cultivars?* bioRxiv, 2025-05. https://doi.org/10.1101/2025.05.28.656616
+* `Loc`
+* `Loc_name`
+* `Lon`
+* `Lat`
+* environmental covariates used as ECs.
+
+## SNP markers
+
+`M10K.csv` contains one row per genotype. The first column is `Gen`; the remaining columns are SNP markers coded numerically.
+
+The 10,000 SNPs were selected without phenotype information, after basic marker filtering and even spacing among eligible markers.
+
+## Data dimensions
+
+| File       | Rows | Columns |
+| ---------- | ---: | ------: |
+| `phe.csv`  |  867 |       7 |
+| `ec.csv`   |   26 |     387 |
+| `M10K.csv` |  378 |   10001 |
+
+## Basic checks
+
+```r
+phe <- data.table::fread("phe.csv")
+ec  <- data.table::fread("ec.csv")
+M   <- data.table::fread("M10K.csv")
+
+setequal(unique(phe$Gen), M$Gen)
+setequal(unique(phe$Loc), ec$Loc)
+```
+
+Expected counts:
+
+```r
+data.table::uniqueN(phe$Gen) # 378
+data.table::uniqueN(phe$Loc) # 26
+```
+
+## Note
+
+These files are the cleaned inputs used in the case study. They do not represent the full CassavaBase database.
+
+Associated preprint: Resende, R. T. (2025). *How to enviromically predict breeding genotypes as if they were commercial cultivars?* bioRxiv. https://doi.org/10.1101/2025.05.28.656616

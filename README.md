@@ -81,9 +81,8 @@ The empirical cassava breeding data originate from CassavaBase. The files made a
 
 If you use this repository, please cite the manuscript associated with this code and data:
 
-Resende, R. T. **How to enviromically predict breeding genotypes as if they were commercial cultivars?**
+Associated preprint: Resende, R. T. (2025). *How to enviromically predict breeding genotypes as if they were commercial cultivars?* bioRxiv. https://doi.org/10.1101/2025.05.28.656616
 
 Please also cite CassavaBase when using the empirical cassava data.
-
 ```
 ```

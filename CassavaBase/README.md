@@ -74,9 +74,3 @@ Expected counts:
 data.table::uniqueN(phe$Gen) # 378
 data.table::uniqueN(phe$Loc) # 26
 ```
-
-## Note
-
-These files are the cleaned inputs used in the case study. They do not represent the full CassavaBase database.
-
-Associated preprint: Resende, R. T. (2025). *How to enviromically predict breeding genotypes as if they were commercial cultivars?* bioRxiv. https://doi.org/10.1101/2025.05.28.656616

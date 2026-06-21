@@ -1,6 +1,6 @@
 # Prediction of Genotypes as Cultivars from Trials to Fields
 
-How to enviromically predict breeding genotypes\\ as if they were commercial cultivars?
+How to enviromically predict breeding genotypes as if they were commercial cultivars?
 
 ````markdown
 # bi-trait
